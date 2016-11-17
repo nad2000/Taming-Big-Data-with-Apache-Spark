@@ -1,6 +1,5 @@
 from pyspark import SparkConf, SparkContext
 from os import path
-import re
 
 DATA_ROOT = "file:///home/nad2000/Dropbox/taming-big-data-with-apache-spark-hands-on"
 
