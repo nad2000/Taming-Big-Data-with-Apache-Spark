@@ -15,8 +15,7 @@ data = sc.textFile(path.join(DATA_ROOT, "customer-orders.csv"))
 result = (data.map(lambda l: extract_data(l))
         .reduceByKey(lambda x, y: x + y)
         .map(lambda (a, b): (b, a))
-        .sortByKey()
-        .map(lambda (a, b): (b, a)))
+        .sortByKey())
 
-for r in result.collect():
-    print "%d\t%.2f" % r
+for (s, c) in result.collect():
+    print "%d\t%.2f" % (c, s)
