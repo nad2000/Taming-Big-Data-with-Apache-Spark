@@ -1,4 +1,5 @@
 from pyspark import SparkConf, SparkContext
+from configuration import data_url, data_filename
 
 conf = SparkConf().setMaster("local").setAppName("PopularHero")
 sc = SparkContext(conf = conf)
@@ -11,14 +12,14 @@ def parseNames(line):
     fields = line.split('\"')
     return (int(fields[0]), fields[1].encode("utf8"))
 
-names = sc.textFile("file:///SparkCourse/marvel-names.txt")
+names = sc.textFile(data_url("data/Marvel-Names.txt"))
 namesRdd = names.map(parseNames)
 
-lines = sc.textFile("file:///SparkCourse/marvel-graph.txt")
+lines = sc.textFile(data_url("data/Marvel-Graph.txt"))
 
 pairings = lines.map(countCoOccurences)
 totalFriendsByCharacter = pairings.reduceByKey(lambda x, y : x + y)
-flipped = totalFriendsByCharacter.map(lambda xy : (xy[1], xy[0]))
+flipped = totalFriendsByCharacter.map(lambda (a, b): (b, a))
 
 mostPopular = flipped.max()
 
