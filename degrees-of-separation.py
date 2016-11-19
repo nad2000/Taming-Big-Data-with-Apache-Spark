@@ -1,5 +1,6 @@
 #Boilerplate stuff:
 from pyspark import SparkConf, SparkContext
+from configuration import data_url, data_filename
 
 conf = SparkConf().setMaster("local").setAppName("DegreesOfSeparation")
 sc = SparkContext(conf = conf)
@@ -19,18 +20,18 @@ def convertToBFS(line):
     for connection in fields[1:]:
         connections.append(int(connection))
 
-    color = 'WHITE'
-    distance = 9999
-
     if (heroID == startCharacterID):
         color = 'GRAY'
         distance = 0
+    else:
+        color = 'WHITE'
+        distance = 9999
 
     return (heroID, (connections, distance, color))
 
 
 def createStartingRdd():
-    inputFile = sc.textFile("file:///sparkcourse/marvel-graph.txt")
+    inputFile = sc.textFile(data_url("data/Marvel-Graph.txt"))
     return inputFile.map(convertToBFS)
 
 def bfsMap(node):
@@ -106,8 +107,8 @@ def bfsReduce(data1, data2):
 #Main program here:
 iterationRdd = createStartingRdd()
 
-for iteration in range(0, 10):
-    print("Running BFS iteration# " + str(iteration+1))
+for iteration in range(0, 10):  ## upper bound is picked arbitrarelly
+    print("Running BFS iteration# %d" % (iteration+1))
 
     # Create new vertices as needed to darken or reduce distances in the
     # reduce stage. If we encounter the node we're looking for as a GRAY
@@ -116,11 +117,10 @@ for iteration in range(0, 10):
 
     # Note that mapped.count() action here forces the RDD to be evaluated, and
     # that's the only reason our accumulator is actually updated.
-    print("Processing " + str(mapped.count()) + " values.")
+    print("Processing %d values." % mapped.count())
 
     if (hitCounter.value > 0):
-        print("Hit the target character! From " + str(hitCounter.value) \
-            + " different direction(s).")
+        print("Hit the target character! From %d different direction(s)." % hitCounter.value)
         break
 
     # Reducer combines data for each character ID, preserving the darkest
